@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>手写测试</title>
+    <style>
+      * {
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display: flex; flex-direction: column;">
+      <div
+        id="main"
+        style="
+          margin: auto;
+          width: 500px;
+          height: 500px;
+          background-color: gray;
+        "
+      ></div>
+      <div id="result"></div>
+    </div>
+    <script>
+      const resultElement = document.getElementById("result");
+      const handwriting = new Handwriting(
+        "#main",
+        {
+          type: "qqShuru",
+          url: "/proxy/qqShuru",
+        },
+        {
+          onEnd: (element, result, error) => {
+            resultElement.innerText = error
+              ? error.toString()
+              : JSON.stringify(result);
+          },
+        }
+      );
+    </script>
+  </body>
+</html>
