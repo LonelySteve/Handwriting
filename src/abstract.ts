@@ -18,5 +18,5 @@ export interface RecognitionResult {
   /**
    * 联想词
    */
-  associatedWords?: string[];
+  assocWords?: string[];
 }

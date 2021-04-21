@@ -1,6 +1,15 @@
 import { FunctionalServiceProvider } from ".";
+import { RecognitionResult } from "../abstract";
 
 const regex = /QQShuru\.HWPanel\.ajax_callback\((.*)\)/;
+
+function convertResponseJson(jsonText: string): RecognitionResult {
+  const data = JSON.parse(jsonText);
+  return {
+    characters: data.cand,
+    assocWords: data.asso,
+  };
+}
 
 export function getQQShuruProvider(url: string): FunctionalServiceProvider {
   //
@@ -14,7 +23,7 @@ export function getQQShuruProvider(url: string): FunctionalServiceProvider {
     xmlHttp.onloadend = function (ev) {
       if (this.readyState === 4 && this.status === 200) {
         try {
-          callback(JSON.parse(regex.exec(this.responseText)[1]));
+          callback(convertResponseJson(regex.exec(this.responseText)[1]));
         } catch (error) {
           callback(null, error);
         }
