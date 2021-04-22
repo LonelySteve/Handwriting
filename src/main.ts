@@ -84,22 +84,25 @@ export default class Handwriting {
 
     const ctx = canvasElement.getContext("2d");
 
+    const initCtx = () => {
+      ctx.strokeStyle = "red";
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+    };
+
     const listeners = {
       resize: () => {
         const { offsetHeight, offsetWidth } = element;
         canvasElement.width = offsetWidth;
         canvasElement.height = offsetHeight;
 
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 3;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
+        initCtx();
       },
     };
 
     addEventListeners(window, listeners);
 
-    listeners.resize()
+    listeners.resize();
 
     const canvasElementListeners = {
       pointerdown: ({ offsetX, offsetY }) => {
@@ -136,6 +139,7 @@ export default class Handwriting {
         data.length = 0;
         // 清空画布
         canvasElement.width = canvasElement.width;
+        initCtx();
       },
     };
 
