@@ -12,32 +12,22 @@
     </style>
   </head>
   <body>
-    <div style="display: flex; flex-direction: column;">
+    <div style="display: flex; flex-direction: column">
       <div
         id="main"
-        style="
-          margin: auto;
-          width: 80%;
-          height: 500px;
-          background-color: gray;
-        "
+        style="margin: auto; width: 80%; height: 500px; background-color: gray"
       ></div>
       <div id="result"></div>
     </div>
     <script>
       const resultElement = document.getElementById("result");
-      const handwriting = new Handwriting(
-        "#main",
-        {
-          type: "qqShuru",
-          url: "/proxy/qqShuru",
+      const handwriting = new Handwriting("#main", "/proxy/qqShuru", {
+        autoSubmitInterval: 200,
+        onEnd: (element, result, error) => {
+          resultElement.innerText =
+            resultElement.innerText + result.characters[0];
         },
-        {
-          onEnd: (element, result, error) => {
-            resultElement.innerText = resultElement.innerText + result.characters[0]
-          },
-        }
-      );
+      });
     </script>
   </body>
 </html>
