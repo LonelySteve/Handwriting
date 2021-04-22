@@ -1,4 +1,5 @@
-import { RecognitionResult } from "./abstract";
+import { HandwritingData, RecognitionResult } from "./abstract";
+import { addEventListeners, removeEventListeners } from "./events";
 import {
   FunctionalServiceProvider,
   ServiceProvider,
@@ -14,15 +15,19 @@ export interface HandwritingOptions {
     result?: RecognitionResult,
     error?: Error
   ) => any;
-  onBeforeDestory?: (this: Handwriting) => any;
+  onBeforeReset?: (this: Handwriting) => any;
+}
+
+interface Context {
+  data: HandwritingData;
+  oldStyles: Record<string, string>;
+  listeners: Record<string, Function>;
+  canvasElement: HTMLCanvasElement;
+  canvasElementListeners: Record<string, Function>;
 }
 
 export default class Handwriting {
-  private elements: HTMLElement[];
-  private canvasElements: [HTMLElement, HTMLCanvasElement][] = [];
-
-  private inited: boolean = false;
-  private destoryed: boolean = false;
+  private readonly elements: Map<HTMLElement, Context | undefined>;
 
   protected readonly functionalServiceProvider: FunctionalServiceProvider;
 
@@ -31,130 +36,129 @@ export default class Handwriting {
     serviceProvider: ServiceProvider,
     private options: HandwritingOptions = {}
   ) {
-    if (typeof selector === "string") {
-      this.elements = Array.prototype.slice.call(
-        document.querySelectorAll(selector)
-      );
-    } else {
-      this.elements = selector;
-    }
+    const elements: HTMLElement[] =
+      typeof selector === "string"
+        ? Array.prototype.slice.call(document.querySelectorAll(selector))
+        : selector;
+
+    this.elements = new Map(elements.map((element) => [element, undefined]));
+
     this.functionalServiceProvider =
       typeof serviceProvider === "function"
         ? serviceProvider
         : toFunctionalServiceProvider(serviceProvider);
 
-    this.init();
-  }
-
-  init() {
-    if (this.inited) {
-      throw new Error("inited");
+    for (const element of this.elements.keys()) {
+      this.mount(element);
     }
-    this.elements.forEach((element) => {
-      this.mountCanvas(element);
-      element.addEventListener("resize", this.handleElementResize);
-    });
-    this.inited = true;
   }
 
-  destory() {
-    if (this.destoryed) {
-      throw new Error("destoryed");
+  reset() {
+    this.options.onBeforeReset?.call(this);
+
+    for (const [element, context] of this.elements.entries()) {
+      this.unmount(element, context);
     }
-    this.options.onBeforeDestory?.call(this);
 
-    this.unmountCanvasElements();
-    this.elements.forEach((element) => {
-      element.removeEventListener("resize", this.handleElementResize);
-    });
-
-    this.destoryed = true;
-  }
-  // TODO 修复 Resize 情景
-  handleElementResize(this: HTMLElement, ev: UIEvent) {
-    throw new Error("Method not implemented.");
+    this.elements.clear();
   }
 
-  unmountCanvasElements() {
-    this.canvasElements.forEach(([element, canvasElement]) => {
-      canvasElement.onpointerdown = canvasElement.onpointermove = canvasElement.onpointerup = canvasElement.onpointerleave = null;
-    });
-    this.canvasElements.length = 0;
-  }
+  mount(element: HTMLElement): HTMLCanvasElement {
+    const data: HandwritingData = [];
 
-  mountCanvas(element: HTMLElement): HTMLCanvasElement {
     const {
-      options: { onStart, onEnd },
+      options: { onStart, onEnd, zIndex = 100 },
     } = this;
-    const { width, height } = element.getBoundingClientRect();
-    // TODO 改进挂载方案，比如监听滚动事件，resize 事件等，按需修改 fixed 定位的 canvas 坐标
+
+    const oldStyles = {
+      position: element.style.position,
+    };
     element.style.position = "relative";
 
     const canvasElement = document.createElement("canvas");
 
-    let down = false;
-
-    canvasElement.width = width;
-    canvasElement.height = height;
     canvasElement.style.position = "absolute";
-    canvasElement.style.zIndex = (this.options.zIndex ?? 100).toString();
+    canvasElement.style.zIndex = zIndex.toString();
+
+    let flag = false;
 
     const ctx = canvasElement.getContext("2d");
 
-    const data = [];
+    const listeners = {
+      resize: () => {
+        const { offsetHeight, offsetWidth } = element;
+        canvasElement.width = offsetWidth;
+        canvasElement.height = offsetHeight;
 
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 3;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    canvasElement.onpointerdown = ({ offsetX, offsetY }) => {
-      down = true;
-      ctx.moveTo(offsetX, offsetY);
-      ctx.beginPath();
-      data.push([~~offsetX, ~~offsetY]);
-      onStart && onStart.call(this, element);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+      },
     };
 
-    canvasElement.onpointermove = ({
-      offsetX,
-      offsetY,
-      movementX,
-      movementY,
-    }) => {
-      if (!down) {
-        return;
-      }
+    addEventListeners(window, listeners);
 
-      ctx.lineTo(offsetX, offsetY);
-      ctx.stroke();
+    listeners.resize()
 
-      data.slice(-1)[0].push([~~movementX, ~~movementY]);
+    const canvasElementListeners = {
+      pointerdown: ({ offsetX, offsetY }) => {
+        flag = true;
+        ctx.moveTo(offsetX, offsetY);
+        ctx.beginPath();
+        data.push([[~~offsetX, ~~offsetY]]);
+        onStart && onStart.call(this, element);
+      },
+      pointermove: ({ offsetX, offsetY, movementX, movementY }) => {
+        if (!flag) {
+          return;
+        }
+
+        ctx.lineTo(offsetX, offsetY);
+        ctx.stroke();
+
+        data.slice(-1)[0].push([~~movementX, ~~movementY]);
+      },
+      pointerup: () => {
+        flag = false;
+        ctx.closePath();
+
+        this.functionalServiceProvider(data, (result, error) => {
+          onEnd && onEnd.call(this, element, result, error);
+        });
+      },
+      pointerleave: () => {
+        flag = false;
+        ctx.closePath();
+      },
+      dblclick: () => {
+        data.length = 0;
+        // 清空画布
+        canvasElement.width = canvasElement.width;
+      },
     };
 
-    canvasElement.onpointerup = () => {
-      down = false;
-      ctx.closePath();
-
-      this.functionalServiceProvider(data, (result, error) => {
-        onEnd && onEnd.call(this, element, result, error);
-      });
-    };
-
-    canvasElement.onpointerleave = () => {
-      down = false;
-      ctx.closePath();
-    };
-
-    canvasElement.ondblclick = () => {
-      data.length = 0;
-      ctx.clearRect(0, 0, width, height);
-    };
+    addEventListeners(canvasElement, canvasElementListeners);
 
     element.append(canvasElement);
 
-    this.canvasElements.push([element, canvasElement]);
+    this.elements.set(element, {
+      data,
+      listeners,
+      canvasElementListeners,
+      oldStyles,
+      canvasElement,
+    });
 
     return canvasElement;
+  }
+
+  unmount(
+    element: HTMLElement,
+    { oldStyles, listeners, canvasElement, canvasElementListeners }: Context
+  ) {
+    Object.assign(element.style, oldStyles);
+    removeEventListeners(window, listeners);
+    removeEventListeners(canvasElement, canvasElementListeners);
   }
 }
