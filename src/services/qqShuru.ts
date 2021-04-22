@@ -3,14 +3,6 @@ import { RecognitionResult } from "../abstract";
 
 const regex = /QQShuru\.HWPanel\.ajax_callback\((.*)\)/;
 
-function convertResponseJson(jsonText: string): RecognitionResult {
-  const data = JSON.parse(jsonText);
-  return {
-    characters: data.cand,
-    assocWords: data.asso,
-  };
-}
-
 export function getQQShuruService(url: string): Service {
   //
   return function (data) {
@@ -24,7 +16,24 @@ export function getQQShuruService(url: string): Service {
       xmlHttp.onloadend = function (ev) {
         if (this.readyState === 4 && this.status === 200) {
           try {
-            resolve(convertResponseJson(regex.exec(this.responseText)[1]));
+            const resultMatches = regex.exec(this.responseText);
+
+            if (resultMatches) {
+              const result = JSON.parse(resultMatches[1]);
+              resolve({
+                characters: result.cand,
+                assocWords: result.asso,
+              });
+            } else {
+              // 直接尝试转换响应文本
+              const response = JSON.parse(this.responseText);
+              // 检查 ret
+              if (response.ret) {
+                throw new Error(`qqShuru ret: ${response.ret}`);
+              } else {
+                throw new Error(`qqShuru response: ${response}`)
+              }
+            }
           } catch (error) {
             reject(error);
           }
