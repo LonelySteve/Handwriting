@@ -232,9 +232,10 @@ export default class Handwriting {
       }
     };
     listeners.set(canvasContext.canvas, {
-      pointerdown: ({ offsetX, offsetY }) => {
+      pointerdown: ({ offsetX, offsetY, pointerId }) => {
         flag = true;
         submit.cancel();
+        canvasContext.canvas.setPointerCapture(pointerId);
         canvasContext.moveTo(offsetX, offsetY);
         canvasContext.beginPath();
         data.push([[~~offsetX, ~~offsetY]]);
@@ -300,6 +301,7 @@ export default class Handwriting {
 
     canvasElement.style.position = "absolute";
     canvasElement.style.zIndex = zIndex.toString();
+    canvasElement.style.top = canvasElement.style.left = canvasElement.style.bottom = canvasElement.style.right = (0).toString();
 
     return canvasElement;
   }
