@@ -218,7 +218,7 @@ export default class Handwriting {
           onEnd && onEnd.call(this, element, null, error);
         })
         .finally(() => {
-          if (autoSubmitWithClearCanvas) {
+          if (!flag && autoSubmitWithClearCanvas) {
             this.clearCanvasAndData(canvasContext, data, options);
           }
         });
