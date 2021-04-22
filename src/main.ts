@@ -8,6 +8,7 @@ import {
 } from "./providers";
 
 export interface HandwritingOptions {
+  autoSubmitInterval?: number;
   zIndex?: number;
   onStart?: (this: Handwriting, element: HTMLElement) => any;
   onEnd?: (
@@ -68,7 +69,7 @@ export default class Handwriting {
     const data: HandwritingData = [];
 
     const {
-      options: { onStart, onEnd, zIndex = 100 },
+      options: { onStart, onEnd, zIndex = 100, autoSubmitInterval: autoCommitInterval = 200 },
     } = this;
 
     const oldStyles = {
@@ -105,6 +106,15 @@ export default class Handwriting {
 
     listeners.resize();
 
+    const submitData = debounce(() => {
+      this.functionalServiceProvider(data, (result, error) => {
+        onEnd && onEnd.call(this, element, result, error);
+        canvasElement.width = canvasElement.width;
+        initCtx();
+        data.length = 0;
+      });
+    }, autoCommitInterval);
+
     const canvasElementListeners = {
       pointerdown: ({ offsetX, offsetY }) => {
         flag = true;
@@ -123,14 +133,12 @@ export default class Handwriting {
         ctx.stroke();
 
         data.slice(-1)[0].push([~~movementX, ~~movementY]);
+
+        submitData();
       },
       pointerup: () => {
         flag = false;
         ctx.closePath();
-
-        this.functionalServiceProvider(data, (result, error) => {
-          onEnd && onEnd.call(this, element, result, error);
-        });
       },
       pointerleave: () => {
         flag = false;

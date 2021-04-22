@@ -34,9 +34,7 @@
         },
         {
           onEnd: (element, result, error) => {
-            resultElement.innerText = error
-              ? error.toString()
-              : JSON.stringify(result);
+            resultElement.innerText = resultElement.innerText + result.characters[0]
           },
         }
       );
