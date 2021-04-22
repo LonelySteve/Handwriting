@@ -22,10 +22,15 @@
     <script>
       const resultElement = document.getElementById("result");
       const handwriting = new Handwriting("#main", "/proxy/qqShuru", {
+        pressureFactor: 6,
         autoSubmitInterval: 200,
         onEnd: (element, result, error) => {
-          resultElement.innerText =
-            resultElement.innerText + result.characters[0];
+          if (error) {
+            resultElement.innerText = error;
+          } else {
+            resultElement.innerText =
+              resultElement.innerText + result.characters[0];
+          }
         },
       });
     </script>
