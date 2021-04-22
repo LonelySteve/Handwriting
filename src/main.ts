@@ -192,12 +192,14 @@ export default class Handwriting {
       this.service(data)
         .then((result) => {
           onEnd && onEnd.call(this, element, result);
-          if (autoSubmitWithClearCanvas) {
-            this.clearCanvasAndData(canvasContext, data, options);
-          }
         })
         .catch((error) => {
           onEnd && onEnd.call(this, element, null, error);
+        })
+        .finally(() => {
+          if (autoSubmitWithClearCanvas) {
+            this.clearCanvasAndData(canvasContext, data, options);
+          }
         });
     }, autoSubmitInterval);
     listeners.set(canvasContext.canvas, {
