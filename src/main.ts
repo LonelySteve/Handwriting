@@ -56,6 +56,12 @@ interface Context {
   query: (withClearCanvas?: boolean) => Promise<RecognitionResult>;
 }
 
+class EmptyElementError extends Error {
+  constructor(public readonly element: HTMLElement) {
+    super(`<${element.tagName}/> is empty element`);
+  }
+}
+
 export default class Handwriting {
   private readonly elements: Map<HTMLElement, Context | undefined>;
 
@@ -92,6 +98,8 @@ export default class Handwriting {
   }
 
   mount(element: HTMLElement, options?: HandwritingOptions): HTMLCanvasElement {
+    this.ensureIsNotEmptyElement(element);
+
     options = Object.assign({}, this.options, options);
 
     const data: HandwritingData = [];
@@ -138,6 +146,19 @@ export default class Handwriting {
     );
 
     this.elements.delete(element);
+  }
+
+  // https://developer.mozilla.org/zh-CN/docs/Glossary/Empty_element
+  protected ensureIsNotEmptyElement(element: HTMLElement) {
+    const tagName = element.tagName.toUpperCase();
+    if (
+      "AREA,BASE,BR,COL,COMMAND,EMBED,HR,IMG,INPUT,KEYGEN,LINK,META,PARAM,SOURCE,TRACK,WBR".includes(
+        tagName
+      ) ||
+      (tagName === "COLGROUP" && element.hasAttribute("span"))
+    ) {
+      throw new EmptyElementError(element);
+    }
   }
 
   protected clearCanvasAndData(
