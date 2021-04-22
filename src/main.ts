@@ -223,6 +223,14 @@ export default class Handwriting {
           }
         });
     }, autoSubmitInterval);
+    const trySubmit = () => {
+      flag = false;
+      canvasContext.closePath();
+
+      if (autoSubmitInterval != null) {
+        submit();
+      }
+    };
     listeners.set(canvasContext.canvas, {
       pointerdown: ({ offsetX, offsetY }) => {
         flag = true;
@@ -246,18 +254,8 @@ export default class Handwriting {
 
         data.slice(-1)[0].push([~~movementX, ~~movementY]);
       },
-      pointerup: () => {
-        flag = false;
-        canvasContext.closePath();
-
-        if (autoSubmitInterval != null) {
-          submit();
-        }
-      },
-      pointerleave: () => {
-        flag = false;
-        canvasContext.closePath();
-      },
+      pointerup: trySubmit,
+      pointerleave: trySubmit,
       dblclick: () => {
         if (!dblclickClear) {
           return;
