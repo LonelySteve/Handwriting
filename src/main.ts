@@ -109,11 +109,12 @@ export default class Handwriting {
         data.push([[~~offsetX, ~~offsetY]]);
         onStart && onStart.call(this, element);
       },
-      pointermove: ({ offsetX, offsetY, movementX, movementY }) => {
+      pointermove: ({ offsetX, offsetY, movementX, movementY, pressure }) => {
         if (!flag) {
           return;
         }
 
+        ctx.lineWidth = pressure * 6;
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
 
