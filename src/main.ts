@@ -1,3 +1,4 @@
+import debounce = require("lodash.debounce");
 import { HandwritingData, RecognitionResult } from "./abstract";
 import { addEventListeners, removeEventListeners } from "./events";
 import {
@@ -91,13 +92,13 @@ export default class Handwriting {
     };
 
     const listeners = {
-      resize: () => {
+      resize: debounce(() => {
         const { offsetHeight, offsetWidth } = element;
         canvasElement.width = offsetWidth;
         canvasElement.height = offsetHeight;
 
         initCtx();
-      },
+      }, 200),
     };
 
     addEventListeners(window, listeners);
