@@ -51,6 +51,7 @@ export interface HandwritingOptions {
 
 interface Context {
   data: HandwritingData;
+  canvasElement: HTMLCanvasElement;
   properties: Map<HTMLElement, object>;
   listeners: Map<EventTarget, Record<string, Function>>;
   query: (withClearCanvas?: boolean) => Promise<RecognitionResult>;
@@ -119,6 +120,7 @@ export default class Handwriting {
 
     this.elements.set(element, {
       data,
+      canvasElement,
       listeners,
       properties,
       query: (withClearCanvas = true) =>
@@ -134,7 +136,9 @@ export default class Handwriting {
   }
 
   unmount(element: HTMLElement) {
-    const { properties, listeners, data } = this.elements.get(element);
+    const { properties, listeners, data, canvasElement } = this.elements.get(
+      element
+    );
 
     data.length = 0;
 
@@ -144,6 +148,8 @@ export default class Handwriting {
     );
 
     this.elements.delete(element);
+    canvasElement.remove();
+
   }
 
   // https://developer.mozilla.org/zh-CN/docs/Glossary/Empty_element
