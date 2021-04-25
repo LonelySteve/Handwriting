@@ -64,7 +64,7 @@ class EmptyElementError extends Error {
 }
 
 export default class Handwriting {
-  private readonly elements: Map<HTMLElement, Context | undefined>;
+  private readonly elements: Map<HTMLElement, Context> = new Map();
 
   protected readonly service: Service;
 
@@ -78,12 +78,10 @@ export default class Handwriting {
         ? Array.prototype.slice.call(document.querySelectorAll(selector))
         : selector;
 
-    this.elements = new Map(elements.map((element) => [element, undefined]));
-
     this.service =
       typeof service === "string" ? getQQShuruService(service) : service;
 
-    for (const element of this.elements.keys()) {
+    for (const element of elements) {
       this.mount(element);
     }
   }
