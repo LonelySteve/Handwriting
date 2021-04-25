@@ -136,6 +136,10 @@ export default class Handwriting {
   }
 
   unmount(element: HTMLElement) {
+    if (!this.elements.has(element)) {
+      return false;
+    }
+
     const { properties, listeners, data, canvasElement } = this.elements.get(
       element
     );
@@ -150,6 +154,7 @@ export default class Handwriting {
     this.elements.delete(element);
     canvasElement.remove();
 
+    return true;
   }
 
   // https://developer.mozilla.org/zh-CN/docs/Glossary/Empty_element
