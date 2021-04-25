@@ -103,10 +103,8 @@ export default class Handwriting {
     options = Object.assign({}, this.options, options);
 
     const data: HandwritingData = [];
-    const canvasElement: HTMLCanvasElement = this.createCanvasElement(options);
-    const canvasContext: CanvasRenderingContext2D = canvasElement.getContext(
-      "2d"
-    );
+    const canvasElement = this.createCanvasElement(options);
+    const canvasContext = canvasElement.getContext("2d")!;
     this.resetCanvasContext(options, canvasContext);
     this.updateCanvasSize(options, element, canvasContext);
 
