@@ -258,10 +258,10 @@ export default class Handwriting {
       }
       this.service(data)
         .then((result) => {
-          onEnd && onEnd.call(this, element, result);
+          !flag && onEnd && onEnd.call(this, element, result);
         })
         .catch((error) => {
-          onEnd && onEnd.call(this, element, null, error);
+          !flag && onEnd && onEnd.call(this, element, null, error);
         })
         .finally(() => {
           if (!flag && autoSubmitWithClearCanvas) {
