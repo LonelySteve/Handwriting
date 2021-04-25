@@ -94,8 +94,6 @@ export default class Handwriting {
     for (const element of this.elements.keys()) {
       this.unmount(element);
     }
-
-    this.elements.clear();
   }
 
   mount(element: HTMLElement, options?: HandwritingOptions): HTMLCanvasElement {
