@@ -18,20 +18,87 @@
         style="margin: auto; width: 80%; height: 500px; background-color: gray"
       ></div>
       <div id="result"></div>
+      <div
+        id="inline-block-example"
+        style="display: inline-block; margin: auto"
+      >
+        普通块级内联元素
+        <div
+          style="width: 100px; height: 100px; background-color: cadetblue"
+        ></div>
+      </div>
+      <div class="wrapper" style="margin-top: 24px">
+        <input
+          type="text"
+          name=""
+          id="input-example-2"
+          style="margin: auto; width: 80%; height: 50px; font-size: 48px"
+        />
+      </div>
+      <input
+        type="text"
+        name=""
+        id="input-example"
+        style="
+          margin: auto;
+          width: 80%;
+          height: 50px;
+          font-size: 48px;
+          margin-top: 24px;
+        "
+      />
     </div>
     <script>
       const resultElement = document.getElementById("result");
-      const handwriting = new Handwriting("#main", "/proxy/qqShuru", {
-        pressureFactor: 6,
-        autoSubmitInterval: 200,
-        onEnd: (element, result, error) => {
-          if (error) {
-            resultElement.innerText = error;
-          } else {
-            resultElement.innerText =
-              resultElement.innerText + result.characters[0];
+
+      try {
+        const handwriting = new Handwriting(
+          "#main, #input-example, #inline-block-example, .wrapper",
+          "/proxy/qqShuru",
+          {
+            pressureFactor: 6,
+            autoSubmitInterval: 200,
+            onEnd: (element, result, error) => {
+              if (error) {
+                resultElement.innerText = error;
+              } else {
+                resultElement.innerText =
+                  resultElement.innerText + result.characters[0];
+              }
+              if (element.classList.contains("wrapper")) {
+                const inputElement = element.querySelector("input");
+                inputElement.value = error
+                  ? error
+                  : inputElement.value + result.characters[0];
+              }
+            },
           }
-        },
+        );
+      } catch (error) {
+        console.error(error);
+      }
+
+      const wrapperCanvas = document.querySelector(".wrapper canvas");
+      const input2 = document.querySelector("#input-example-2");
+
+      wrapperCanvas.addEventListener("click", (ev) => {
+        console.log(ev);
+        input2.focus();
+      });
+
+      input2.addEventListener("keyup", (ev) => {
+        ev.stopPropagation();
+      });
+      input2.addEventListener("keydown", (ev) => {
+        ev.stopPropagation();
+      });
+      document.addEventListener("keydown", (ev) => {
+        console.log(ev);
+        input2.dispatchEvent(new KeyboardEvent("keydown", ev));
+      });
+      document.addEventListener("keyup", (ev) => {
+        console.log(ev);
+        input2.dispatchEvent(new KeyboardEvent("keyup", ev));
       });
     </script>
   </body>
