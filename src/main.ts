@@ -20,7 +20,7 @@ export interface HandwritingOptions {
    */
   autoSubmitWithClearCanvas?: boolean;
   /**
-   * 双击清除画板内容
+   * 双击清除画板内容，在自动提交生效的情况下，此选项无效
    */
   dblclickClear?: boolean;
   /**
@@ -39,13 +39,24 @@ export interface HandwritingOptions {
    * canvas 元素的 zIndex，缺省为 100
    */
   zIndex?: number;
+  /**
+   * 在某个元素开始手写输入时的回调函数
+   */
   onStart?: (this: Handwriting, element: HTMLElement) => any;
+  /**
+   * 当某个元素结束手写输入后的回调函数
+   *
+   * 开发者应通过此回调处理识别结果或者错误
+   */
   onEnd?: (
     this: Handwriting,
     element: HTMLElement,
     result?: RecognitionResult,
     error?: Error
   ) => any;
+  /**
+   * 当调用 reset 方法准备卸载并重置所有元素之前的回调函数
+   */
   onBeforeReset?: (this: Handwriting) => any;
 }
 
@@ -68,6 +79,13 @@ export default class Handwriting {
 
   protected readonly service: Service;
 
+  /**
+   * 实例化一个 Handwriting 对象
+   *
+   * @param selector 要挂载的元素选择器，元素数组
+   * @param service 手写识别的服务，可以是字符串，此时表示使用 QQShuru API 规范的服务入口路径
+   * @param options Handwriting 的选项
+   */
   constructor(
     selector: string | HTMLElement[],
     service: Service | string,
@@ -86,6 +104,9 @@ export default class Handwriting {
     }
   }
 
+  /**
+   * 重置 Handwriting，所有已挂载的元素均会被卸载
+   */
   reset() {
     this.options.onBeforeReset?.call(this);
 
@@ -94,6 +115,13 @@ export default class Handwriting {
     }
   }
 
+  /**
+   * 将手写识别功能挂载到新的元素上，可指定特定的选项参数
+   *
+   * @param element 被挂载的元素，不能传递空元素，\<INPUT/\> 是典型的空元素之一
+   * @param options 方法级别的选项参数
+   * @returns 与被挂载元素相关联的上下文
+   */
   mount(element: HTMLElement, options?: HandwritingOptions): Context {
     // 如果指定元素已经被挂载，则返回相应的上下文
     if (this.elements.has(element)) {
@@ -138,6 +166,12 @@ export default class Handwriting {
     return context;
   }
 
+  /**
+   * 卸载已挂载的元素
+   *
+   * @param element 要卸载的元素
+   * @returns 卸载成功则返回 true，如果指定元素并没有相关联的上下文，则返回 false
+   */
   unmount(element: HTMLElement) {
     if (!this.elements.has(element)) {
       return false;
