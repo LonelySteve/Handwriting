@@ -270,7 +270,7 @@ export default class Handwriting {
       pointerup: trySubmit,
       pointerleave: trySubmit,
       dblclick: () => {
-        if (!dblclickClear) {
+        if (!dblclickClear || autoSubmitInterval > 0) {
           return;
         }
         data.length = 0;
