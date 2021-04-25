@@ -238,8 +238,8 @@ export default class Handwriting {
     const trySubmit = () => {
       flag = false;
       canvasContext.closePath();
-
-      if (autoSubmitInterval != null) {
+      // 自动提交的值必须大于 0 才有效
+      if (autoSubmitInterval > 0) {
         submit();
       }
     };
