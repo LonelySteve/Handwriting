@@ -252,22 +252,31 @@ export default class Handwriting {
     });
     // canvas element listeners
     let flag = false;
+    let latestPromise;
     const submit = debounce(() => {
       if (data.length === 0) {
         return;
       }
-      this.service(data)
+      // 利用闭包性质确定是不是最新 Promise 导致的 then，catch 或 finally
+      // 这样做是为了避免由于服务响应过慢，分笔画的时候出现多个结果，这些结果往往是对还没完全手写完的字的识别结果
+      const promise = (latestPromise = this.service(data)
         .then((result) => {
-          !flag && onEnd && onEnd.call(this, element, result);
+          promise === latestPromise &&
+            !flag &&
+            onEnd &&
+            onEnd.call(this, element, result);
         })
         .catch((error) => {
-          !flag && onEnd && onEnd.call(this, element, null, error);
+          promise === latestPromise &&
+            !flag &&
+            onEnd &&
+            onEnd.call(this, element, null, error);
         })
         .finally(() => {
-          if (!flag && autoSubmitWithClearCanvas) {
+          if (promise === latestPromise && !flag && autoSubmitWithClearCanvas) {
             this.clearCanvasAndData(canvasContext, data, options);
           }
-        });
+        }));
     }, autoSubmitInterval);
     const trySubmit = () => {
       flag = false;
