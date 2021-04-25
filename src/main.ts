@@ -96,7 +96,12 @@ export default class Handwriting {
     }
   }
 
-  mount(element: HTMLElement, options?: HandwritingOptions): HTMLCanvasElement {
+  mount(element: HTMLElement, options?: HandwritingOptions): Context {
+    // 如果指定元素已经被挂载，则返回相应的上下文
+    if (this.elements.has(element)) {
+      return this.elements.get(element)!;
+    }
+
     this.ensureIsNotEmptyElement(element);
 
     options = Object.assign({}, this.options, options);
@@ -116,7 +121,7 @@ export default class Handwriting {
 
     element.append(canvasElement);
 
-    this.elements.set(element, {
+    const context = {
       data,
       canvasElement,
       listeners,
@@ -128,9 +133,11 @@ export default class Handwriting {
           }
           return result;
         }),
-    });
+    };
 
-    return canvasElement;
+    this.elements.set(element, context);
+
+    return context;
   }
 
   unmount(element: HTMLElement) {
