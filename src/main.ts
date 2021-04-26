@@ -74,6 +74,31 @@ class EmptyElementError extends Error {
   }
 }
 
+type ElementCollection = string | HTMLElement[] | JQuery;
+
+function $(collection: ElementCollection) {
+  if (typeof collection === "string") {
+    return {
+      map: Array.prototype.slice.call(document.querySelectorAll(collection))
+        .map,
+    };
+  }
+  if (collection instanceof Array) {
+    return {
+      map: collection.map,
+    };
+  }
+
+  return {
+    map: (callback: (element: HTMLElement, index: number) => any) =>
+      collection
+        .map(function (i) {
+          return callback(this, i);
+        })
+        .toArray(),
+  };
+}
+
 export default class Handwriting {
   private readonly elements: Map<HTMLElement, Context> = new Map();
 
@@ -82,26 +107,19 @@ export default class Handwriting {
   /**
    * 实例化一个 Handwriting 对象
    *
-   * @param selector 要挂载的元素选择器，元素数组
+   * @param elements 要挂载的元素集合
    * @param service 手写识别的服务，可以是字符串，此时表示使用 QQShuru API 规范的服务入口路径
    * @param options Handwriting 的选项
    */
   constructor(
-    selector: string | HTMLElement[],
+    elements: ElementCollection,
     service: Service | string,
     private options: HandwritingOptions = {}
   ) {
-    const elements: HTMLElement[] =
-      typeof selector === "string"
-        ? Array.prototype.slice.call(document.querySelectorAll(selector))
-        : selector;
-
     this.service =
       typeof service === "string" ? getQQShuruService(service) : service;
 
-    for (const element of elements) {
-      this.mount(element);
-    }
+    this.mount(elements);
   }
 
   /**
@@ -110,9 +128,30 @@ export default class Handwriting {
   reset() {
     this.options.onBeforeReset?.call(this);
 
-    for (const element of this.elements.keys()) {
-      this.unmount(element);
-    }
+    this.unmount([...this.elements.keys()]);
+  }
+
+  /**
+   * 将手写识别功能挂载到新的元素上，可指定方法级别的选项参数，实例化的选项参数将作为默认值
+   *
+   * @param elements 被挂载的元素集合，不能包含空元素，\<INPUT/\> 是典型的空元素之一
+   * @param options 方法级别的选项参数
+   */
+  mount(elements: ElementCollection, options?: HandwritingOptions) {
+    $(elements).map((element) => {
+      this._mount(element, options);
+    });
+  }
+
+  /**
+   * 卸载已挂载的元素
+   *
+   * @param element 要卸载的元素集合
+   */
+  unmount(elements: ElementCollection) {
+    $(elements).map((element) => {
+      this._unmount(element);
+    });
   }
 
   /**
@@ -122,7 +161,11 @@ export default class Handwriting {
    * @param options 方法级别的选项参数
    * @returns 与被挂载元素相关联的上下文
    */
-  mount(element: HTMLElement, options?: HandwritingOptions): Context {
+
+  protected _mount(
+    element: HTMLElement,
+    options?: HandwritingOptions
+  ): Context {
     // 如果指定元素已经被挂载，则返回相应的上下文
     if (this.elements.has(element)) {
       return this.elements.get(element)!;
@@ -166,13 +209,7 @@ export default class Handwriting {
     return context;
   }
 
-  /**
-   * 卸载已挂载的元素
-   *
-   * @param element 要卸载的元素
-   * @returns 卸载成功则返回 true，如果指定元素并没有相关联的上下文，则返回 false
-   */
-  unmount(element: HTMLElement) {
+  protected _unmount(element: HTMLElement) {
     if (!this.elements.has(element)) {
       return false;
     }

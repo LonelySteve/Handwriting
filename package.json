@@ -17,6 +17,7 @@
     "url": "git@github.com:LonelySteve/Handwriting.git"
   },
   "devDependencies": {
+    "@types/jquery": "^3.5.5",
     "@types/jsonp": "^0.2.0",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.merge": "^4.6.6",
