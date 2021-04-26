@@ -155,12 +155,17 @@ export default class Handwriting {
   }
 
   /**
-   * 将手写识别功能挂载到新的元素上，可指定特定的选项参数
+   * 手动查询被挂载元素集合的识别结果
    *
-   * @param element 被挂载的元素，不能传递空元素，\<INPUT/\> 是典型的空元素之一
-   * @param options 方法级别的选项参数
-   * @returns 与被挂载元素相关联的上下文
+   * @param element 被挂载的元素
+   * @param withClearCanvas 查询完成后清除画板
+   * @returns 识别结果数组的 Promise
    */
+  async query(elements: ElementCollection, withClearCanvas = false) {
+    return Promise.all(
+      $(elements).map((element) => this._query(element, withClearCanvas))
+    );
+  }
 
   protected _mount(
     element: HTMLElement,
@@ -229,6 +234,14 @@ export default class Handwriting {
     canvasElement.remove();
 
     return true;
+  }
+
+  protected async _query(element: HTMLElement, withClearCanvas = false) {
+    if (!this.elements.has(element)) {
+      throw new Error(`no such element: ${element}`);
+    }
+
+    return await this.elements.get(element).query(withClearCanvas);
   }
 
   // https://developer.mozilla.org/zh-CN/docs/Glossary/Empty_element
