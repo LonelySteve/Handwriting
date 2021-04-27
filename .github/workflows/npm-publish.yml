@@ -5,7 +5,7 @@ name: Node.js Package
 
 on:
   push:
-    branches: 
+    branches:
       - "releases/**"
 
 jobs:
@@ -32,17 +32,3 @@ jobs:
       - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
-  publish-gpr:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
-          scope: "@LonelySteve"
-      - run: yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GPR_TOKEN}}
