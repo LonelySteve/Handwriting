@@ -1,0 +1,8 @@
+examples/
+.github/
+.vscode/
+gulpfile.js
+tsconfig*
+webpack*
+
+
