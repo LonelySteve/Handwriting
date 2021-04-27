@@ -2,6 +2,11 @@
   "name": "handwriting",
   "version": "0.1.0",
   "description": "Mounts handwriting recognition to DOM elements",
+  "keywords": [
+    "handwriting",
+    "handwriting-recognition",
+    "canvas"
+  ],
   "main": "dist/handwriting.js",
   "types": "dist/handwriting.d.ts",
   "author": "JLoeve <jianglufull@foxmail.com>",
