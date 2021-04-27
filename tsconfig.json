@@ -4,9 +4,8 @@
     "downlevelIteration": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "lib": [
-      "ES2019.Array",
+      "ESNext",
       "DOM"
     ]
   },
