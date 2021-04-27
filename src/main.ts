@@ -1,6 +1,5 @@
 import debounce = require("lodash.debounce");
 import merge = require("lodash.merge");
-
 import { HandwritingData, RecognitionResult } from "./abstract";
 import { addEventListeners, removeEventListeners } from "./events";
 import { Service } from "./services";
@@ -77,21 +76,24 @@ class EmptyElementError extends Error {
 type ElementCollection = string | HTMLElement[] | JQuery;
 
 function $(collection: ElementCollection) {
+  let elements = undefined;
+
   if (typeof collection === "string") {
-    return {
-      map: Array.prototype.slice.call(document.querySelectorAll(collection))
-        .map,
-    };
+    elements = Array.prototype.slice.call(
+      document.querySelectorAll(collection)
+    );
   }
   if (collection instanceof Array) {
-    return {
-      map: collection.map,
-    };
+    elements = collection;
+  }
+
+  if (elements) {
+    return { map: elements.map.bind(elements) };
   }
 
   return {
     map: (callback: (element: HTMLElement, index: number) => any) =>
-      collection
+      (collection as JQuery)
         .map(function (i) {
           return callback(this, i);
         })
