@@ -163,7 +163,7 @@ export default class Handwriting {
    * @param withClearCanvas 查询完成后清除画板
    * @returns 识别结果数组的 Promise
    */
-  async query(elements: ElementCollection, withClearCanvas = false) {
+  async query(elements: ElementCollection, withClearCanvas = false): Promise<RecognitionResult[]> {
     return Promise.all(
       $(elements).map((element) => this._query(element, withClearCanvas))
     );
