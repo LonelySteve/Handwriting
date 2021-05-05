@@ -65,6 +65,7 @@ interface Context {
   properties: Map<HTMLElement, object>;
   listeners: Map<EventTarget, Record<string, Function>>;
   query: (withClearCanvas?: boolean) => Promise<RecognitionResult>;
+  forceUpdateCanvasSize: () => void;
 }
 
 class EmptyElementError extends Error {
@@ -163,7 +164,10 @@ export default class Handwriting {
    * @param withClearCanvas 查询完成后清除画板
    * @returns 识别结果数组的 Promise
    */
-  async query(elements: ElementCollection, withClearCanvas = false): Promise<RecognitionResult[]> {
+  async query(
+    elements: ElementCollection,
+    withClearCanvas = false
+  ): Promise<RecognitionResult[]> {
     return Promise.all(
       $(elements).map((element) => this._query(element, withClearCanvas))
     );
@@ -209,6 +213,9 @@ export default class Handwriting {
           }
           return result;
         }),
+      forceUpdateCanvasSize: () => {
+        this.updateCanvasSize(options, element, canvasContext);
+      },
     };
 
     this.elements.set(element, context);
