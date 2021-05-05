@@ -77,6 +77,7 @@ export interface Context {
 	properties: Map<HTMLElement, object>;
 	listeners: Map<EventTarget, Record<string, Function>>;
 	query: (withClearCanvas?: boolean) => Promise<RecognitionResult>;
+	forceUpdateCanvasSize: () => void;
 }
 export declare type ElementCollection = string | HTMLElement[] | JQuery;
 export default class Handwriting {
@@ -115,18 +116,7 @@ export default class Handwriting {
 	 * @param withClearCanvas 查询完成后清除画板
 	 * @returns 识别结果数组的 Promise
 	 */
-	query(elements: ElementCollection, withClearCanvas?: boolean): Promise<[
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown,
-		unknown
-	]>;
+	query(elements: ElementCollection, withClearCanvas?: boolean): Promise<RecognitionResult[]>;
 	protected _mount(element: HTMLElement, options?: HandwritingOptions): Context;
 	protected _unmount(element: HTMLElement): boolean;
 	protected _query(element: HTMLElement, withClearCanvas?: boolean): Promise<RecognitionResult>;
