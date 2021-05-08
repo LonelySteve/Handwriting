@@ -43,6 +43,10 @@ export interface HandwritingOptions {
    */
   disableResizeHandler?: boolean;
   /**
+   * 缩放倍率
+   */
+  zoomRatio?: number;
+  /**
    * 在某个元素开始手写输入时的回调函数
    */
   onStart?: (this: Handwriting, element: HTMLElement) => any;
@@ -308,6 +312,7 @@ export default class Handwriting {
       pressureFactor,
       autoSubmitInterval,
       disableResizeHandler,
+      zoomRatio = 1,
       autoSubmitWithClearCanvas = true,
     } = options;
     const listeners = new Map<EventTarget, Record<string, Function>>();
@@ -377,7 +382,9 @@ export default class Handwriting {
         canvasContext.lineTo(offsetX, offsetY);
         canvasContext.stroke();
 
-        data.slice(-1)[0].push([~~movementX, ~~movementY]);
+        data
+          .slice(-1)[0]
+          .push([~~(movementX * zoomRatio), ~~(movementY * zoomRatio)]);
       },
       pointerup: trySubmit,
       pointerleave: trySubmit,
@@ -401,6 +408,9 @@ export default class Handwriting {
     canvasContext: CanvasRenderingContext2D
   ) {
     const { offsetHeight, offsetWidth } = element;
+
+    canvasContext.canvas.style.width = offsetWidth + "px";
+    canvasContext.canvas.style.height = offsetHeight + "px";
 
     canvasContext.canvas.width = offsetWidth;
     canvasContext.canvas.height = offsetHeight;
