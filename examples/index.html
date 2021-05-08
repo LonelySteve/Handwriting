@@ -58,7 +58,7 @@
           {
             pressureFactor: 6,
             autoSubmitInterval: 200,
-            onEnd: (element, result, error) => {
+            onEnd: ({ element, result, error }) => {
               if (error) {
                 resultElement.innerText = error;
               } else {

@@ -49,9 +49,12 @@ export interface HandwritingOptions {
    */
   onEnd?: (
     this: Handwriting,
-    element: HTMLElement,
-    result?: RecognitionResult,
-    error?: Error
+    bundle: {
+      data: HandwritingData;
+      element: HTMLElement;
+      result?: RecognitionResult;
+      error?: Error;
+    }
   ) => any;
   /**
    * 当调用 reset 方法准备卸载并重置所有元素之前的回调函数
@@ -323,13 +326,13 @@ export default class Handwriting {
           promise === latestPromise &&
             !flag &&
             onEnd &&
-            onEnd.call(this, element, result);
+            onEnd.call(this, { element, result, data });
         })
         .catch((error) => {
           promise === latestPromise &&
             !flag &&
             onEnd &&
-            onEnd.call(this, element, null, error);
+            onEnd.call(this, { element, error, data });
         })
         .finally(() => {
           if (promise === latestPromise && !flag && autoSubmitWithClearCanvas) {
