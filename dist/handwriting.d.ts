@@ -57,6 +57,10 @@ export interface HandwritingOptions {
 	 */
 	zIndex?: number;
 	/**
+	 * 禁用 resize 事件处理器，目前可能存在 BUG
+	 */
+	disableResizeHandler?: boolean;
+	/**
 	 * 在某个元素开始手写输入时的回调函数
 	 */
 	onStart?: (this: Handwriting, element: HTMLElement) => any;

@@ -1,6 +1,6 @@
 {
   "name": "@jloeve/handwriting",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Mounts handwriting recognition to DOM elements",
   "keywords": [
     "handwriting",
