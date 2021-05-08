@@ -39,6 +39,10 @@ export interface HandwritingOptions {
    */
   zIndex?: number;
   /**
+   * 禁用 resize 事件处理器，目前可能存在 BUG
+   */
+  disableResizeHandler?: boolean;
+  /**
    * 在某个元素开始手写输入时的回调函数
    */
   onStart?: (this: Handwriting, element: HTMLElement) => any;
@@ -303,15 +307,18 @@ export default class Handwriting {
       dblclickClear,
       pressureFactor,
       autoSubmitInterval,
+      disableResizeHandler,
       autoSubmitWithClearCanvas = true,
     } = options;
     const listeners = new Map<EventTarget, Record<string, Function>>();
-    // window listener
-    listeners.set(window, {
-      resize: debounce(() => {
-        this.updateCanvasSize(options, element, canvasContext);
-      }, 200),
-    });
+    if (!disableResizeHandler) {
+      // window listener
+      listeners.set(window, {
+        resize: debounce(() => {
+          this.updateCanvasSize(options, element, canvasContext);
+        }, 200),
+      });
+    }
     // canvas element listeners
     let flag = false;
     let latestPromise;
