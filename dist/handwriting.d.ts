@@ -61,6 +61,10 @@ export interface HandwritingOptions {
 	 */
 	disableResizeHandler?: boolean;
 	/**
+	 * 缩放倍率
+	 */
+	zoomRatio?: number;
+	/**
 	 * 在某个元素开始手写输入时的回调函数
 	 */
 	onStart?: (this: Handwriting, element: HTMLElement) => any;
