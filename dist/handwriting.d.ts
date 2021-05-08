@@ -65,7 +65,12 @@ export interface HandwritingOptions {
 	 *
 	 * 开发者应通过此回调处理识别结果或者错误
 	 */
-	onEnd?: (this: Handwriting, element: HTMLElement, result?: RecognitionResult, error?: Error) => any;
+	onEnd?: (this: Handwriting, bundle: {
+		data: HandwritingData;
+		element: HTMLElement;
+		result?: RecognitionResult;
+		error?: Error;
+	}) => any;
 	/**
 	 * 当调用 reset 方法准备卸载并重置所有元素之前的回调函数
 	 */
