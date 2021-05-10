@@ -148,11 +148,17 @@ export default class Handwriting {
   /**
    * 将手写识别功能挂载到新的元素上，可指定方法级别的选项参数，实例化的选项参数将作为默认值
    *
+   * 如果指定的元素已经挂载了手写支持，则将重新挂载
+   *
    * @param elements 被挂载的元素集合，不能包含空元素，\<INPUT/\> 是典型的空元素之一
    * @param options 方法级别的选项参数
    */
   mount(elements: ElementCollection, options?: HandwritingOptions) {
     $(elements).map((element) => {
+      // 如果当前元素已经挂载，则先卸载之
+      if (this.elements.has(element)) {
+        this._unmount(element);
+      }
       this._mount(element, options);
     });
   }
